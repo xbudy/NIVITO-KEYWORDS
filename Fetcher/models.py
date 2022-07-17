@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List,Dict
 import random
-from constants import DEFAULT_SKU_KEYWORDS
+from Fetcher.constants import DEFAULT_SKU_KEYWORDS
 
 
 @dataclass

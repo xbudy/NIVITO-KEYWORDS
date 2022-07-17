@@ -34,20 +34,20 @@ class Keywords:
 			else:
 				return None, None
 
-		masterData = {}  # Contains {domain: [stockname, kws]}
+		master_data = {}  # Contains {domain: [stockname, kws]}
 		for row in data:
 			domain_name, kws = parse_row(row)
 			if domain_name:
-				if domain_name in masterData.keys():
-					masterData[domain_name] += kws
+				if domain_name in master_data.keys():
+					master_data[domain_name] += kws
 				else:
-					masterData[domain_name] = kws
+					master_data[domain_name] = kws
 
-		for domain in masterData:
+		for domain in master_data:
 			stocks = Stocks(dict())
-			for stock in masterData[domain]:
+			for stock in master_data[domain]:
 				stocks.add_stock(stock[0], stock[1])
-			self.Domains.addDomain(domain, stocks.items)
+			self.Domains.add_domain(domain, stocks.items)
 
 
 class Fetcher(Keywords):
