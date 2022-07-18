@@ -1,7 +1,8 @@
 from typing import List
+import time
 from Fetcher.models import Domains,Stocks
 from Fetcher.connect import initGspreadClient
-from Fetcher.utils import is_url, get_tld
+from Fetcher.utils import is_url, get_tld, time_now
 from Fetcher.constants import *
 
 
@@ -60,8 +61,9 @@ class Fetcher(Keywords):
 	"""
 	def __init__(self):
 		super().__init__()
-		self.to_update = []
-		self.ws       = self.sheet.worksheet(WORKSHEET_TO_UPDATE)
+		self.to_update   = []
+		self.ws          = self.sheet.worksheet(WORKSHEET_TO_UPDATE)
+		self.last_update = time_now()
 		
 	def update(self):
 		"""
@@ -73,11 +75,15 @@ class Fetcher(Keywords):
 			if len(row) >= 2 and not len(row) >= 5: 
 				if is_url(row[0]):
 					domain = get_tld(row[0]).upper()
-					kws    = self.Domains.getKws(domain, row[1])
-					self._updateOnWs(rowid, kws)
+					kws    = self.Domains.get_shuffled_keywords(domain, row[1])
+					self.__update_on_ws(rowid, kws)
 		self.__update_on_ws("", "", True)
 
 	def __update_on_ws(self,rowId: int, kws: List[str], force: bool=False):
+		now=time_now()
+		if not(delta := (now-self.last_update).total_seconds()) >= SECONDS_BETWEEN_UPDATES:
+			print("wait before update")
+			time.sleep(SECONDS_BETWEEN_UPDATES - delta)
 		if force:
 			print("Forcing update")
 			self.ws.batch_update(self.to_update)
@@ -87,4 +93,5 @@ class Fetcher(Keywords):
 		if len(self.to_update) == MAX_TO_UPDATE:
 			print("Updating")
 			self.ws.batch_update(self.to_update)
-			self.to_update=[]
+			self.to_update   = []
+			self.last_update = time_now()
